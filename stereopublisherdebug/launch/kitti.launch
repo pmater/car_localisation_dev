@@ -1,0 +1,4 @@
+<launch>
+        <param name="stereopublisherdebug/camPublishFrequency" value="3" type="int" />
+	<node ns="stereopublisherdebug" name="stereopublisherdebug" pkg="stereopublisherdebug" type="stereopublisherdebug" args="Kitti00" output="screen" />
+</launch>

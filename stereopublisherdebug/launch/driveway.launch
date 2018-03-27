@@ -1,0 +1,3 @@
+<launch>
+	<node ns="stereopublisherdebug" name="stereopublisherdebug" pkg="stereopublisherdebug" type="stereopublisherdebug" args="Driveway1" output="screen" />
+</launch>
