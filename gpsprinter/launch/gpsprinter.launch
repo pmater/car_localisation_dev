@@ -1,0 +1,3 @@
+<launch>
+  <node pkg="gpsprinter" type="gpsprinter_node" name="gpsprinter" output="screen"/>
+</launch>

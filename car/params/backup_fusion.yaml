@@ -1,3 +1,73 @@
+#A UKF instance that fuses odometry and IMU data and outputs an odom-frame state estimate
+#Produces odom->base_link transformation which must not use GPS or SLAM (?)
+#This node kickstarts the whole process. It received an IMU, then publishes odometry/filtered which nav_sat_transform receives, starting it up and sending an odometry/gps to ukf_se_map
+ukf_se_odom:
+  frequency: 30
+  sensor_timeout: 0.1
+  two_d_mode: true
+  transform_time_offset: 0.0
+  transform_timeout: 0.0
+  print_diagnostics: true
+  debug: true
+  debug_out_file: /home/roby/Desktop/ukf_se_odom_debug.txt
+
+  map_frame: map
+  odom_frame: odom
+  base_link_frame: base_link
+  world_frame: odom #Because a continuous source (IMU) is being used, this value must be the same as odom_frame
+
+
+  #Purpose of this node is to have an odometry source, which I lack for now
+
+  imu0: imu
+  imu0_config: [false, false, false,
+                true,  true,  false,
+                false, false, false,
+                true,  true,  true,
+                true,  true,  true]
+  imu0_nodelay: false
+  imu0_differential: false
+  imu0_relative: false
+  imu0_queue_size: 10
+  imu0_remove_gravitational_acceleration: true
+
+  use_control: false
+
+  process_noise_covariance: [1e-3, 0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                             0,    1e-3, 0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                             0,    0,    1e-3, 0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                             0,    0,    0,    0.3,  0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                             0,    0,    0,    0,    0.3,  0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                             0,    0,    0,    0,    0,    0.01, 0,     0,     0,    0,    0,    0,    0,    0,    0,
+                             0,    0,    0,    0,    0,    0,    0.5,   0,     0,    0,    0,    0,    0,    0,    0,
+                             0,    0,    0,    0,    0,    0,    0,     0.5,   0,    0,    0,    0,    0,    0,    0,
+                             0,    0,    0,    0,    0,    0,    0,     0,     0.1,  0,    0,    0,    0,    0,    0,
+                             0,    0,    0,    0,    0,    0,    0,     0,     0,    0.3,  0,    0,    0,    0,    0,
+                             0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0.3,  0,    0,    0,    0,
+                             0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0.3,  0,    0,    0,
+                             0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0.3,  0,    0,
+                             0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0.3,  0,
+                             0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0.3]
+
+  initial_estimate_covariance: [1e-9, 0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                0,    1e-9, 0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                0,    0,    1e-9, 0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                0,    0,    0,    1.0,  0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                0,    0,    0,    0,    1.0,  0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                0,    0,    0,    0,    0,    1e-9, 0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                0,    0,    0,    0,    0,    0,    1.0,  0,    0,    0,     0,     0,     0,    0,    0,
+                                0,    0,    0,    0,    0,    0,    0,    1.0,  0,    0,     0,     0,     0,    0,    0,
+                                0,    0,    0,    0,    0,    0,    0,    0,    1.0,  0,     0,     0,     0,    0,    0,
+                                0,    0,    0,    0,    0,    0,    0,    0,    0,    1.0,   0,     0,     0,    0,    0,
+                                0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     1.0,   0,     0,    0,    0,
+                                0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     1.0,   0,    0,    0,
+                                0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     1.0,  0,    0,
+                                0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    1.0,  0,
+                                0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    1.0]
+
+#A second UKF instance that fuses the same data, but also fuses the transformed GPS data from navsat_transform
+#Produces map->odom transform, but requires odom->base_link from before.
+#The desired output of the whole system seems to be map->base_link. Both these nodes therefore do map->odom->base_link
 ukf_se_map:
   frequency: 30
   sensor_timeout: 0.1
@@ -5,13 +75,13 @@ ukf_se_map:
   transform_time_offset: 0.0
   transform_timeout: 0.0
   print_diagnostics: true
-  debug: false
+  debug: true
   debug_out_file: /home/roby/Desktop/ukf_se_map_debug.txt
 
   map_frame: map
   odom_frame: odom
   base_link_frame: base_link
-  world_frame: odom
+  world_frame: map #If using GPS, need to set this to same as map_frame.
 
   odom0: odometry/gps #Not designed to receive gps/fix. Receives odometry/gps which is a cartesian type from navsat_transform.
   odom0_config: [true,  true,  false,
