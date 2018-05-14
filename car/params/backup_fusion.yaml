@@ -147,7 +147,8 @@ ukf_se_map:
 
 #An instance of navsat_transform_node, which takes in GPS data and produces pose data that has been transformed into your robot's world frame (here, map). The node produces a map-frame state estimate.
 #Inputs: gps/fix, imu/data, odometry/filtered (from both state estimation nodes. Once received, the subscription is apparently cancelled.)
-#Output: odometry/gps (feed this into a state estimate node), gps/filtered (Not necessary, but nice) 
+#Output: odometry/gps (feed this into a state estimate node), gps/filtered (Not necessary, but nice)
+#I think this needs to listen to ukf_se_map and not the odom one: https://answers.ros.org/question/215570/robot_localization-gps-integration-error/
 navsat_transform:
   frequency: 30
   delay: 3.0

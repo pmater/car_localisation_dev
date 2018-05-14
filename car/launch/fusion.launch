@@ -1,12 +1,24 @@
 <launch>
 
   <!-- Default coordinate system of VN-100 is NED, so we need to subscribe to a topic which is an ENU conversion, which is what EKF wants-->
-  <remap from="/imu/data" to="/imu_enu" />
+  <remap from="/imu/data" to="/imu_enu/data" />
 
   <rosparam command="load" file="$(find car)/params/fusion.yaml" />
 
-  <node pkg="robot_localization" type="ukf_localization_node" name="ukf_se_map" clear_params="true"/>
+  <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se_odom" clear_params="true">
+    <remap from="odometry/filtered" to="ekf/odom"/>
+  </node>
 
-  <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform" clear_params="true" />
+  <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se_map" clear_params="true">
+    <remap from="odometry/filtered" to="ekf/map"/>
+  </node>
+
+  <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se_gps" clear_params="true">
+    <remap from="odometry/filtered" to="ekf/gps_map"/>
+  </node>
+
+  <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform" clear_params="true">
+    <remap from="odometry/filtered" to="ekf/gps_map"/>
+  </node>
 
 </launch>
