@@ -1,0 +1,15 @@
+<launch>
+  <arg name="camera" default="/zed"/>
+  <param name="/use_sim_time" value="true"/>
+
+  <!-- Run the stereo image proc -->
+  <node ns="stereo_image_proc" pkg="stereo_image_proc" type="stereo_image_proc" name="stereo_image_proc" />
+
+  <!-- Viso2 -->
+  <node pkg="viso2_ros" type="stereo_odometer" name="stereo_odometer">
+    <remap from="stereo" to="$(arg camera)"/>
+    <remap from="image" to="image_rect_color"/>
+    <param name="base_link_frame_id" value="base_link"/>
+  </node>
+
+</launch>

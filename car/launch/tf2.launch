@@ -1,4 +1,11 @@
 <launch>
+
+    <!-- Using simulated time is important when playing rosbags. It stops rviz and mapviz from messing up. Set this to false when localising in realtime. -->
+    <!-- IMPORTANT: Call rosbag with clock argument, otherwise EKF (and other stuff?) won't work and you won't get any feedback -->
+    <param name ="/use_sim_time" value="true"/>
+
+
+
     <!-- Note: Can move this into an urdf and use robot_state_publisher, which may be easier for the future -->
 
     <!--Rotation along x axis by 180 degrees (1 0 0 0 quat) to line up IMU with ROS standard. TODO: translation-->
@@ -7,7 +14,11 @@
 
     <node pkg="tf2_ros" type="static_transform_publisher" name="base_link_to_vectornav_enu" args="0 0 0 0 0 0 1 base_link vectornav" />
 
-    <node pkg="tf2_ros" type="static_transform_publisher" name="vectornav_to_enu" args="0 0 0 1.5708 0 3.1416 vectornav vectornav_enu"/>
+    <!-- Will make things correct for the orientation, but messes up the angular acceleration? -->
+    <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="vectornav_to_enu" args="0 0 0 1.5708 0 3.1416 vectornav vectornav_enu"/> -->
+
+    <!-- Makes the orientation incorrect, but linear acceleration is fine? -->
+    <node pkg="tf2_ros" type="static_transform_publisher" name="vectornav_to_enu" args="0 0 0 0 0 3.1416 vectornav vectornav_enu"/>
 
     <node pkg="imu_transformer" type="imu_transformer_node" name="imu_data_transformer" output="screen">
         <remap from="imu_in" to="/imu"/>
@@ -24,4 +35,10 @@
     <!-- loam_velodyne has a non-standard coordinate system, so we need to transform it to be ROS compliant-->
     <node pkg="tf2_ros" type="static_transform_publisher" name="loam_init_to_map" args="0 0 0 1.570795 0 1.570795 map loam_init" /> <!-- loam_init is like a map frame. The vehicle is measured relative to this. -->
     <node pkg="tf2_ros" type="static_transform_publisher" name="velodyne_to_loam" args="0 0 0 -1.570795 0 -1.570795 loam velodyne" /> <!-- loam is a moving frame, positioned on the LIDAR-->
+
+
+    <node pkg="tf2_ros" type="static_transform_publisher" name="base_link_to_camera" args="1.88 0 0.6 0 0 0 base_link camera_link" />
+    <node pkg="tf2_ros" type="static_transform_publisher" name="camera_to_left" args="0.06 0 0 0 0 0 camera_link zed_left_camera" />
+    <node pkg="tf2_ros" type="static_transform_publisher" name="camera_to_right" args="-0.06 0 0 0 0 0 camera_link zed_right_camera" />
+
 </launch>

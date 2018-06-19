@@ -1,0 +1,9 @@
+<launch>
+
+	<include file="$(find car)/launch/tf2.launch"/>
+	<include file="$(find car)/launch/fusion.launch"/>
+	<!--<include file="$(find car)/launch/mapviz.launch"/>-->
+	<include file="$(find loam_velodyne)/launch/loam_velodyne.launch"/>
+	<include file="$(find odom_to_loam)/launch/odom_to_loam.launch"/>
+
+</launch>

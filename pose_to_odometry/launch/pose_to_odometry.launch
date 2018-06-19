@@ -1,0 +1,3 @@
+<launch>
+  <node pkg="pose_to_odometry" type="pose_to_odometry_node" name="pose_to_odometry" output="screen"/>
+</launch>

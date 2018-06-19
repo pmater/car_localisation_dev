@@ -46,36 +46,6 @@ namespace imu_transformer
     {
       ImuMsg imu_out;
       tf2_->transform(*imu_in, imu_out, target_frame_);
-      imu_out.orientation_covariance[0] = 0.000004;
-      imu_out.orientation_covariance[4] = 0.000004;
-      imu_out.orientation_covariance[8] = 0.000004;
-      imu_out.angular_velocity_covariance[0] = 0.000004;
-      imu_out.angular_velocity_covariance[4] = 0.000004;
-      imu_out.angular_velocity_covariance[8] = 0.000004;
-      imu_out.linear_acceleration_covariance[0] = 0.000004;
-      imu_out.linear_acceleration_covariance[4] = 0.000004;
-      imu_out.linear_acceleration_covariance[8] = 0.000004;
-
-
-      double roll, pitch, yaw;
-      tf2::Quaternion qin(
-        imu_in->orientation.x,
-        imu_in->orientation.y,
-        imu_in->orientation.z,
-        imu_in->orientation.w);
-      tf2::Matrix3x3 min(qin);
-      min.getRPY(roll, pitch, yaw);
-      ROS_INFO_STREAM(roll * 180 / 3.141592654 << ", " << pitch * 180 / 3.141592654 << ", " << yaw * 180 / 3.141592654);
-
-      tf2::Quaternion qout(
-        imu_out.orientation.x,
-        imu_out.orientation.y,
-        imu_out.orientation.z,
-        imu_out.orientation.w);
-      tf2::Matrix3x3 mout(qout);
-      mout.getRPY(roll, pitch, yaw);
-      ROS_INFO_STREAM(roll * 180 / 3.141592654 << ", " << pitch * 180 / 3.141592654 << ", " << yaw * 180 / 3.141592654 << "\n");
-
       imu_pub_.publish(imu_out);
     }
     catch (tf2::TransformException ex)

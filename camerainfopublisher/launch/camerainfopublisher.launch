@@ -1,0 +1,3 @@
+<launch>
+  <node pkg="camerainfopublisher" type="camerainfopublisher_node" name="camerainfopublisher" output="screen"/>
+</launch>
